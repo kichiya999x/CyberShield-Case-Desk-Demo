@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="CyberShield: Case Desk. A fictional, offline investigation training simulator.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; script-src 'self' file:; style-src 'self' file:; img-src 'self' file: data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>CyberShield: Case Desk</title>
+  <link rel="icon" href="public/branding/cybershield-logo.png">
+  <link rel="stylesheet" href="src/styles/app.css">
+  <script defer src="src/data/records.js"></script>
+  <script defer src="src/cases/cases.js"></script>
+  <script defer src="src/engine.js"></script>
+  <script defer src="src/components.js"></script>
+  <script defer src="src/screens.js"></script>
+  <script defer src="src/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <div id="app"></div>
+  <div id="announcer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+  <dialog id="overlay" aria-labelledby="dialog-title"></dialog>
+  <noscript>This local training simulator needs JavaScript enabled. No internet connection or sign-in is required.</noscript>
+</body>
+</html>
