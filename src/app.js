@@ -4,6 +4,7 @@
   const overlay = document.getElementById('overlay');
   const { icon, escape: e, button, field } = CaseDesk.ui;
   let returnFocus = null;
+  let resetClosePending = false;
   let pendingDiscovery = null;
   const headerObserver = new ResizeObserver(entries => {
     const header=entries[0]?.target;
@@ -16,7 +17,7 @@
     const focusId = focused?.id;
     const focusAction = focused?.dataset?.action;
     const focusActionId = focused?.dataset?.id;
-    const caret = focused instanceof HTMLInputElement ? focused.selectionStart : null;
+    const caret = (focused instanceof HTMLInputElement || focused instanceof HTMLTextAreaElement) ? focused.selectionStart : null;
     app.innerHTML = CaseDesk.ui.frame(CaseDesk.screens[CaseDesk.state.stage](CaseDesk.state), CaseDesk.state);
     const guideBody=app.querySelector('.mission-body');if(guideBody)guideBody.scrollTop=guideScroll;
     headerObserver.disconnect();const header=app.querySelector('.topbar');
@@ -31,7 +32,7 @@
     else if (focusId && !overlay.open) {
       const restored = document.getElementById(focusId);
       restored?.focus({ preventScroll: true });
-      if (caret !== null && restored instanceof HTMLInputElement && restored.type !== 'checkbox') {
+      if (caret !== null && (restored instanceof HTMLInputElement || restored instanceof HTMLTextAreaElement) && restored.type !== 'checkbox') {
         try { restored.setSelectionRange(caret, caret); } catch { /* Some native input types have no selection range. */ }
       }
     }
@@ -46,6 +47,7 @@
     if(CaseDesk.state.guidance)announce(CaseDesk.state.guidance.text);
   }
   function dispatch(action, focusHeading = false) {
+    if(['RESET','BRIEF','EXPLORE','SELECT_TRACK'].includes(action.type))CaseDesk.advanced?.cleanup?.();
     const before = CaseDesk.state.clues.length;
     CaseDesk.state = CaseDesk.engine.reduce(CaseDesk.state, action);
     render(focusHeading);
@@ -57,6 +59,7 @@
     if(CaseDesk.state.discoveryVisible)dispatch({type:'DISMISS_DISCOVERY'});
   }
   overlay.addEventListener('close', () => {
+    if (resetClosePending) { resetClosePending = false; return; }
     if (overlay.open) return;
     document.body.classList.remove('dialog-open');
     if(matchMedia('(max-width:760px)').matches)app.querySelector('[data-action="toggle-nav"]')?.setAttribute('aria-expanded','false');
@@ -119,7 +122,10 @@
     showDialog(CaseDesk.details.event(event));
   }
   function reset() {
+    // A queued close event must not steal focus from the next visitor's control.
+    resetClosePending = overlay.open;
     closeDialog();
+    document.body.classList.remove('dialog-open');
     overlay.innerHTML='';
     returnFocus = null; pendingDiscovery = null;
     dispatch({ type: 'RESET' }, true);
